@@ -1,0 +1,55 @@
+version: "3.8"
+
+services:
+  msa_sidekiq_redis:
+    container_name: msa_sidekiq_redis
+    image: redis:6.0
+    volumes:
+      - msa-sidekiq-redis-data:/data
+    healthcheck:
+      test: [ 'CMD-SHELL', 'redis-cli ping' ]
+      interval: 30s
+      timeout: 30s
+      retries: 3
+    ports:
+      - '6384:6379'
+    networks:
+      - msa
+
+  msa_db:
+    container_name: msa_db
+    image: postgres:14.2-bullseye
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=postgres
+    ports:
+      - '5435:5432'
+    networks:
+      - msa
+
+  msa_dev:
+    container_name: msa_dev
+    env_file:
+      - shared.docker.env
+      - overrides.docker.env
+    init: true
+    command: ./bin/init.sh
+    build:
+      context: .
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - '3003:3003'
+    networks:
+      - msa
+    stdin_open: true
+    tty: true
+
+networks:
+  msa:
+
+volumes:
+  pg-data:
+  msa-sidekiq-redis-data:
