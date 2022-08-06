@@ -41,7 +41,7 @@ services:
     volumes:
       - .:/usr/src/app
     ports:
-      - '3003:3003'
+      - '3000:3000'
     networks:
       - msa
     stdin_open: true
